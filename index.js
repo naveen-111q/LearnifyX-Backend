@@ -50,7 +50,9 @@ app.get('/api/health', async (req, res) => {
         res.status(500).json({ status: 'error', database: 'disconnected', error: err.message });
     }
 });
-
+app.get("/", (req, res) => {
+    res.send("API is running...");
+});
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, '0.0.0.0', () => {
