@@ -45,7 +45,7 @@ app.get('/api/health', async (req, res) => {
     try {
         const connection = await pool.getConnection();
         connection.release();
-        res.json({ status: 'ok', database: 'connected' });
+        res.json({ status: 'ok', database: 'connected', deployedAt: '2026-04-20 12:00:00 UTC' });
     } catch (err) {
         res.status(500).json({ status: 'error', database: 'disconnected', error: err.message });
     }
