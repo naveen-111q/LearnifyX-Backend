@@ -222,13 +222,19 @@ router.post('/:id/attempt', authenticateToken, requireRole('student'), async (re
         );
 
         // Get current date/time in server's local timezone as strings for safe comparison
-        const nowLocal = new Date();
-        const localDateStr = nowLocal.getFullYear() + '-' +
-            String(nowLocal.getMonth() + 1).padStart(2, '0') + '-' +
-            String(nowLocal.getDate()).padStart(2, '0');
-        const localTimeStr = String(nowLocal.getHours()).padStart(2, '0') + ':' +
-            String(nowLocal.getMinutes()).padStart(2, '0') + ':' +
-            String(nowLocal.getSeconds()).padStart(2, '0');
+        // Use Intl to get Indian Date/Time specifically, as most users/exams are in that timezone
+        const kolkataParts = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'Asia/Kolkata',
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit', second: '2-digit',
+            hour12: false
+        }).formatToParts(new Date());
+        
+        const parts = {};
+        kolkataParts.forEach(p => parts[p.type] = p.value);
+        
+        const localDateStr = `${parts.year}-${parts.month}-${parts.day}`;
+        const localTimeStr = `${parts.hour}:${parts.minute}:${parts.second}`;
 
         // Normalize startTime/endTime: MySQL TIME columns can return "HH:MM:SS" or duration objects
         const normalizeTime = (t) => {
