@@ -3,6 +3,21 @@ const pool = require('../db');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 
 const router = express.Router();
+const fs = require('fs');
+const path = require('path');
+
+// Temporary Debug Route
+router.get('/debug/logs', async (req, res) => {
+    try {
+        const logPath = path.join(__dirname, '../server_error.log');
+        if (fs.existsSync(logPath)) {
+            const content = fs.readFileSync(logPath, 'utf8');
+            res.type('text/plain').send(content);
+        } else {
+            res.send('Log file not found');
+        }
+    } catch (e) { res.status(500).send(e.message); }
+});
 
 /**
  * @route   GET /api/exams
@@ -283,6 +298,14 @@ router.post('/:id/attempt', authenticateToken, requireRole('student'), async (re
         const nowDT   = `${localDateStr} ${localTimeStr}`;
         const startDT = `${examDateStr} ${normStart}`;
         const endDT   = `${examDateStr} ${normEnd}`;
+
+        // DBG: Log to server_error.log
+        try {
+            const fs = require('fs');
+            const path = require('path');
+            const logLine = `[LMS_DEBUG] nowDT: ${nowDT} | startDT: ${startDT} | Result: ${nowDT < startDT ? 'EARLY' : 'OK'}\n`;
+            fs.appendFileSync(path.join(__dirname, '../server_error.log'), logLine);
+        } catch (e) {}
 
         console.log(`[Exam Check] Student: ${req.user.id}, Exam: ${req.params.id}`);
         console.log(`[Exam Check] Now (local): ${nowDT}`);
